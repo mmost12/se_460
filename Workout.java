@@ -22,6 +22,10 @@ import javax.swing.Timer;
 import javax.swing.SwingConstants;
 import java.text.*;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
 public class Workout {
    Date wo_date;
    float watts_made;
@@ -32,17 +36,16 @@ public class Workout {
    String wo_name;
    Workout_manager wo_manager;
 
+   JFrame f = new JFrame("Digital Clock");
+   private JButton up_btn   = new JButton("up");
+   private JButton down_btn = new JButton("down");
 
-   // -------------------------
-   //  ClockLabel dateLable = new ClockLabel("date");
-   //  ClockLabel timeLable = new ClockLabel("time");
-   //  ClockLabel dayLable = new ClockLabel("day");
-    //
-   //  JFrame f = new JFrame("Digital Clock");
-   // ------------------------
+   private JPanel pnlButtons  = new JPanel();
+
+   private JLabel Up   = new JLabel("Up", JLabel.CENTER);
+   private JLabel Down = new JLabel("Down", JLabel.CENTER);
 
    public Workout() {
-      // This constructor has one parameter, name.
       wo_name          = "Manual";
       wo_date          = new Date();
       cals_burned      = 0;
@@ -52,44 +55,87 @@ public class Workout {
       resistence_level = 0;
       wo_manager       = new Workout_manager();
 
-      // ------------
-      //  JFrame.setDefaultLookAndFeelDecorated(true);
-      //  f.setSize(300,150);
-      //  f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      //  f.setLayout(new GridLayout(3, 1));
-       //
-      //  f.add(dateLable);
-      //  f.add(timeLable);
-      //  f.add(dayLable);
-       //
-      //  f.getContentPane().setBackground(Color.black);
-       //
-      //  f.setVisible(true);
-      // ------------
+      JFrame.setDefaultLookAndFeelDecorated(true);
+      f.setSize(800,150);
+      f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      f.setLayout(new GridLayout(3, 3));
+      f.add(wo_manager);
+      f.getContentPane().setBackground(Color.black);
+
+      addControls();
+      registerListeners();
 
       // wo_manager.setDaemon(true);
    }
 
+	public void addControls()
+	{
+		f.add(pnlButtons, BorderLayout.CENTER);
+
+      pnlButtons.setLayout(new GridLayout(1,3,1,3));
+		pnlButtons.add(up_btn);
+		pnlButtons.add(down_btn);
+	}
+
+	public void registerListeners()
+	{
+      up_btn.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            Thread thread = new Thread(new Runnable() {
+               @Override
+               public void run() {
+                  if(resistence_level < 20) {
+                     resistence_level++;
+                     wo_manager.set_resistence(resistence_level);
+                  }
+               }
+            });
+            thread.start();
+         }
+      });
+
+      down_btn.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            Thread thread = new Thread(new Runnable() {
+               @Override
+               public void run() {
+                  if(resistence_level > 0) {
+                     resistence_level--;
+                     wo_manager.set_resistence(resistence_level);
+                  }
+               }
+            });
+            thread.start();
+         }
+      });
+	}
+
    public void start_wo() {
       Scanner reader = new Scanner(System.in);
 
-      System.out.print("Select resistence level: (1-20)\n-> ");
-      resistence_level = reader.nextInt();
+      // System.out.print("Select resistence level: (1-20)\n-> ");
+      // resistence_level = reader.nextInt();
 
-      try {
-         System.out.print("3.. ");
-         Thread.sleep(1000);
-         System.out.print("2.. ");
-         Thread.sleep(1000);
-         System.out.print("1.. ");
-         Thread.sleep(1000);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-      System.out.print("\rBegin workout!\n");
+      // try {
+      //    System.out.print("3.. ");
+      //    Thread.sleep(1000);
+      //    System.out.print("2.. ");
+      //    Thread.sleep(1000);
+      //    System.out.print("1.. ");
+      //    Thread.sleep(1000);
+      // } catch (InterruptedException e) {
+      //    e.printStackTrace();
+      // }
+      // System.out.print("\rBegin workout!\n");
 
+      resistence_level = 1;
       wo_manager.set_resistence(resistence_level);
-      // wo_manager.start();
+
+      f.setVisible(true);
+
+      wo_manager.start();
    }
 
    public void run_wo() {
@@ -156,30 +202,32 @@ public class Workout {
 
       int choice;
       Boolean continue_wo = true;
-      Workout wo          = new Workout();
+      // Workout wo;
       Scanner reader      = new Scanner(System.in);
+      Fitnessmenu j       = new Fitnessmenu();
 
-      System.out.println("Please select a workout mode from the list:\n" +
-                         "1 - Manual\n" +
-                         "2 - Hill\n" +
-                         "3 - Cardio\n" +
-                         "4 - Strength\n" +
-                         "5 - User\n");
-
-      choice = reader.nextInt();
-
-      switch (choice) {
-         case 1:  wo = new Workout(); break;
-         case 2:  wo = new Hill_Workout(); break;
-         case 3:  wo = new Cardio_Workout(); break;
-         case 4:  wo = new Strength_Workout(); break;
-         case 5:  wo = new Workout(); break;
-         default: System.out.println("Invalid selection!");
-      }
-
-      wo.start_wo();
-      wo.run_wo();
-      wo.finish_wo();
+      // System.out.println("Please select a workout mode from the list:\n" +
+      //                    "1 - Manual\n" +
+      //                    "2 - Hill\n" +
+      //                    "3 - Cardio\n" +
+      //                    "4 - Strength\n" +
+      //                    "5 - User\n");
+      //
+      // choice = reader.nextInt();
+      //
+      // switch (choice) {
+      //    case 1:  wo = new Workout(); break;
+      //    case 2:  wo = new Hill_Workout(); break;
+      //    case 3:  wo = new Cardio_Workout(); break;
+      //    case 4:  wo = new Strength_Workout(); break;
+      //    case 5:  wo = new Workout(); break;
+      //    default: System.out.println("Invalid selection!");
+      //             wo = new Workout();
+      // }
+      //
+      // wo.start_wo();
+      // wo.run_wo();
+      // wo.finish_wo();
    }
 
     public class Workout_manager extends JLabel implements ActionListener {
@@ -197,32 +245,38 @@ public class Workout {
        float watts_made        = 0;
        //  int avg_hbm;
        String display_time;
+       String display;
 
       //   @Override
-        public void run() {
-            while (true) {
-                try {
-                    get_rpms();
-                    calculate_stats();
+        public Workout_manager() {
 
-                    display_time = String.format("%2d:%2d",
-                       TimeUnit.SECONDS.toMinutes(time),
-                       time - TimeUnit.SECONDS.toMinutes(time) * 60
-                    );
-
-                    System.out.format("\r\033[K%-5s %-5.2f mi   %3.1f mph %-5d", display_time, distance, current_rate, resistence_level);
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                   // Anticipating the inturruption for exit
-                   System.out.print("\r\033[K");
-                }
-                time++;
-                time_step++;
-
-               Timer t = new Timer(1000, this);
-               t.start();
-            }
+            setForeground(Color.green);
         }
+
+        public void start() {
+           Timer t = new Timer(1000, this);
+           t.start();
+        }
+
+       public void actionPerformed(ActionEvent ae) {
+
+         get_rpms();
+         calculate_stats();
+
+         display_time = String.format("%02d:%02d",
+            TimeUnit.SECONDS.toMinutes(time),
+            time - TimeUnit.SECONDS.toMinutes(time) * 60
+         );
+
+         display = String.format("%-5s %-5.2f mi   %3.1f mph %-5d", display_time, distance, current_rate, resistence_level);
+
+         setFont(new Font("sans-serif", Font.PLAIN, 50));
+         setHorizontalAlignment(SwingConstants.LEFT);
+
+         time++;
+         time_step++;
+         setText(display);
+       }
 
 // ----------------------------- setter methods ----------------------------- //
         public void set_resistence(int level) {resistence_level = level;}
@@ -298,10 +352,6 @@ public class Workout {
            }
         }
 
-        public void actionPerformed(ActionEvent ae) {
-          Date d = new Date();
-         //  setText(sdf.format(d));
-        }
     }
 
     class ClockLabel extends JLabel implements ActionListener {

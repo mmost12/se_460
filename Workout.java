@@ -30,51 +30,40 @@ public class Workout {
    Date wo_date;
    float watts_made;
    float wo_distance;
-   int avg_hbm;
    int cals_burned;
    int resistence_level;
    String wo_name;
    Workout_manager wo_manager;
 
-   JFrame f = new JFrame("Digital Clock");
-   private JButton up_btn   = new JButton("up");
-   private JButton down_btn = new JButton("down");
-
-   private JPanel pnlButtons  = new JPanel();
-
-   private JLabel Up   = new JLabel("Up", JLabel.CENTER);
-   private JLabel Down = new JLabel("Down", JLabel.CENTER);
+   JFrame f;
+   JButton up_btn;
+   JButton down_btn;
+   JButton stop_btn;
+   JPanel pnlButtons;
 
    public Workout() {
       wo_name          = "Manual";
       wo_date          = new Date();
       cals_burned      = 0;
       watts_made       = 0;
-      avg_hbm          = 0;
       wo_distance      = 0;
       resistence_level = 0;
       wo_manager       = new Workout_manager();
-
-      JFrame.setDefaultLookAndFeelDecorated(true);
-      f.setSize(800,150);
-      f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      f.setLayout(new GridLayout(3, 3));
-      f.add(wo_manager);
-      f.getContentPane().setBackground(Color.black);
-
-      addControls();
-      registerListeners();
-
-      // wo_manager.setDaemon(true);
+      f                = new JFrame("Clock");
+      up_btn           = new JButton("up");
+      down_btn         = new JButton("down");
+      stop_btn         = new JButton("stop");
+      pnlButtons       = new JPanel();
    }
 
 	public void addControls()
 	{
 		f.add(pnlButtons, BorderLayout.CENTER);
 
-      pnlButtons.setLayout(new GridLayout(1,3,1,3));
+      pnlButtons.setLayout(new GridLayout(1,3,3,3));
 		pnlButtons.add(up_btn);
 		pnlButtons.add(down_btn);
+		pnlButtons.add(stop_btn);
 	}
 
 	public void registerListeners()
@@ -110,25 +99,32 @@ public class Workout {
             thread.start();
          }
       });
+
+      stop_btn.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            Thread thread = new Thread(new Runnable() {
+               @Override
+               public void run() {
+                  finish_wo();
+               }
+            });
+            thread.start();
+         }
+      });
 	}
 
    public void start_wo() {
-      Scanner reader = new Scanner(System.in);
 
-      // System.out.print("Select resistence level: (1-20)\n-> ");
-      // resistence_level = reader.nextInt();
+      JFrame.setDefaultLookAndFeelDecorated(true);
+      f.setSize(900,150);
+      f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      f.setLayout(new GridLayout(2, 3));
+      f.add(wo_manager);
+      f.getContentPane().setBackground(Color.black);
 
-      // try {
-      //    System.out.print("3.. ");
-      //    Thread.sleep(1000);
-      //    System.out.print("2.. ");
-      //    Thread.sleep(1000);
-      //    System.out.print("1.. ");
-      //    Thread.sleep(1000);
-      // } catch (InterruptedException e) {
-      //    e.printStackTrace();
-      // }
-      // System.out.print("\rBegin workout!\n");
+      addControls();
+      registerListeners();
 
       resistence_level = 1;
       wo_manager.set_resistence(resistence_level);
@@ -159,23 +155,48 @@ public class Workout {
       int total_time       = wo_manager.get_time();
       float total_distance = wo_manager.get_distance();
       String display_time;
-      // wo_manager.interrupt();
+      String summary_display;
+
+      f.remove(wo_manager);
+      f.remove(pnlButtons);
+
+      f.setLayout(new GridLayout(1, 1));
+
+      JLabel summary  = new JLabel();
+      summary.setForeground(Color.green);
+      f.add(summary);
 
       display_time = String.format("%2d:%2d",
          TimeUnit.SECONDS.toMinutes(total_time),
          total_time - TimeUnit.SECONDS.toMinutes(total_time) * 60
       );
 
-      System.out.print("\r\033[K\n-------------------------------------------------\n" +
-                       "Workout summary:     " + wo_date + "\n\n");
-      System.out.format("  Distance:   %.2f\n" +
-                        "  Time:       %s\n" +
-                        "  Diff Lvl:   %d\n" +
-                        "  Calories:   %d\n" +
-                        "  Watts:      %f\n" +
-                        "  Heart rate: %d\n" +
-                        "-------------------------------------------------\n",
-                        total_distance, display_time, resistence_level, cals_burned, watts_made, avg_hbm);
+      summary_display = String.format(
+                        "<html>Workout summary:<br><br>" +
+                        "  Date:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%s<br>" +
+                        "  Distance:&nbsp;&nbsp;&nbsp;&nbsp;%.2f<br>" +
+                        "  Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%s<br>" +
+                        "  Diff Lvl:&nbsp;&nbsp;&nbsp;&nbsp;%d<br>" +
+                        "  Calories:&nbsp;&nbsp;&nbsp;&nbsp;%d<br>" +
+                        "  Watts:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%f<br></html>",
+                        wo_date, total_distance, display_time, resistence_level, cals_burned, watts_made);
+
+     summary.setFont(new Font("sans-serif", Font.PLAIN, 30));
+     summary.setHorizontalAlignment(SwingConstants.LEFT);
+     summary.setText(summary_display);
+
+     f.setSize(800,400);
+     f.repaint();
+
+     try {
+        Thread.sleep(5000);
+     }
+     catch(InterruptedException e) {
+        e.printStackTrace();
+     }
+
+     f.setVisible(false);
+     f.dispose();
    }
 
 // ----------------------------- setter methods ----------------------------- //
@@ -183,7 +204,6 @@ public class Workout {
    public void set_wo_date( Date date ) {wo_date = date;}
    public void set_cals_burned( int cals ) {cals_burned = cals;}
    public void set_watts_made( float watts ) {watts_made = watts;}
-   public void set_avg_hbm( int hbm ) {avg_hbm = hbm;}
    public void set_distance( float distance ) {wo_distance = distance;}
    public void set_resistence( int resistence ) {resistence_level = resistence;}
 // -------------------------- End setter methods ---------------------------- //
@@ -193,42 +213,10 @@ public class Workout {
    public Date get_wo_date() {return wo_date;}
    public int get_cals_burned() {return cals_burned;}
    public float get_watts_made() {return watts_made;}
-   public int get_avg_hbm() {return avg_hbm;}
    public float get_distance() {return wo_distance;}
    public int get_resistence_level() {return resistence_level;}
 // -------------------------- End getter methods ---------------------------- //
 
-   public static void main(String []args) {
-
-      int choice;
-      Boolean continue_wo = true;
-      // Workout wo;
-      Scanner reader      = new Scanner(System.in);
-      Fitnessmenu j       = new Fitnessmenu();
-
-      // System.out.println("Please select a workout mode from the list:\n" +
-      //                    "1 - Manual\n" +
-      //                    "2 - Hill\n" +
-      //                    "3 - Cardio\n" +
-      //                    "4 - Strength\n" +
-      //                    "5 - User\n");
-      //
-      // choice = reader.nextInt();
-      //
-      // switch (choice) {
-      //    case 1:  wo = new Workout(); break;
-      //    case 2:  wo = new Hill_Workout(); break;
-      //    case 3:  wo = new Cardio_Workout(); break;
-      //    case 4:  wo = new Strength_Workout(); break;
-      //    case 5:  wo = new Workout(); break;
-      //    default: System.out.println("Invalid selection!");
-      //             wo = new Workout();
-      // }
-      //
-      // wo.start_wo();
-      // wo.run_wo();
-      // wo.finish_wo();
-   }
 
     public class Workout_manager extends JLabel implements ActionListener {
 
@@ -243,14 +231,12 @@ public class Workout {
        float old_rate          = 0;
        float previous_distance = 0;
        float watts_made        = 0;
-       //  int avg_hbm;
        String display_time;
        String display;
 
       //   @Override
         public Workout_manager() {
-
-            setForeground(Color.green);
+           setForeground(Color.green);
         }
 
         public void start() {
@@ -268,7 +254,7 @@ public class Workout {
             time - TimeUnit.SECONDS.toMinutes(time) * 60
          );
 
-         display = String.format("%-5s %-5.2f mi   %3.1f mph %-5d", display_time, distance, current_rate, resistence_level);
+         display = String.format("%-5s   %-5.2fmi   %-4.1f mph   %-5d", display_time, distance, current_rate, resistence_level);
 
          setFont(new Font("sans-serif", Font.PLAIN, 50));
          setHorizontalAlignment(SwingConstants.LEFT);
@@ -351,42 +337,13 @@ public class Workout {
                e.printStackTrace();
            }
         }
-
     }
 
-    class ClockLabel extends JLabel implements ActionListener {
+    public static void main(String []args) {
 
-      String type;
-      SimpleDateFormat sdf;
-
-      public ClockLabel(String type) {
-        this.type = type;
-        setForeground(Color.green);
-
-        switch (type) {
-          case "date" : sdf = new SimpleDateFormat("  MMMM dd yyyy");
-                        setFont(new Font("sans-serif", Font.PLAIN, 12));
-                        setHorizontalAlignment(SwingConstants.LEFT);
-                        break;
-          case "time" : sdf = new SimpleDateFormat("hh:mm:ss a");
-                        setFont(new Font("sans-serif", Font.PLAIN, 40));
-                        setHorizontalAlignment(SwingConstants.CENTER);
-                        break;
-          case "day"  : sdf = new SimpleDateFormat("EEEE  ");
-                        setFont(new Font("sans-serif", Font.PLAIN, 16));
-                        setHorizontalAlignment(SwingConstants.RIGHT);
-                        break;
-          default     : sdf = new SimpleDateFormat();
-                        break;
-        }
-
-        Timer t = new Timer(1000, this);
-        t.start();
-      }
-
-      public void actionPerformed(ActionEvent ae) {
-        Date d = new Date();
-        setText(sdf.format(d));
-      }
+       int choice;
+       Boolean continue_wo = true;
+       Scanner reader      = new Scanner(System.in);
+       Fitnessmenu j       = new Fitnessmenu();
     }
 }

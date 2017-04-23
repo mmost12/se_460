@@ -1,0 +1,21 @@
+#!/bin/bash
+
+./change_rpms 10
+sleep 1
+./change_rpms 20
+sleep 1
+./change_rpms 40
+sleep 1
+./change_rpms 65
+sleep 1
+./change_rpms 70
+sleep 4
+./change_rpms 75
+sleep 8
+./change_rpms 80
+sleep 10
+./change_rpms 100
+sleep 30
+./change_rpms 105
+sleep 30
+./change_rpms 55

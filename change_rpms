@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rpms=$1;
+echo "$rpms rpms!";
+jq -c ".rpms = $rpms" car_inputs.json > tmp.$$.json && mv tmp.$$.json car_inputs.json
